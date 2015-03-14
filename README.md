@@ -1,14 +1,18 @@
-# Meteor reCAPTCHA
-Google's reCAPTCHA is a free CAPTCHA service that protects your site against spam, malicious registrations and other forms of attacks where computers try to disguise themselves as a human. In addition to protecting your site, reCAPTCHA also helps digitize old books and newspapers.
+# Meteor reCAPTCHA V2
+This package implements the version 2 of Google reCAPTCHA. 
 
-reCAPTCHA is at https://developers.google.com/recaptcha/
+It is a fork of the package [Altapp/Meteor-reCAPTCHA](https://github.com/Altapp/Meteor-reCAPTCHA) which implements Google reCAPTCHA Version 1.
+
+Google reCAPTCHA is a free CAPTCHA service that protects your site against spam, malicious registrations and other forms of attacks where computers try to disguise themselves as a human. In addition to protecting your site, reCAPTCHA also helps digitize old books and newspapers.
+
+Google reCAPTCHA documentation is available at https://developers.google.com/recaptcha/
 
 Package made with the help of this [StackOverflow question](http://stackoverflow.com/questions/22253196/working-example-of-recaptcha-in-meteor).
 
 ## Installation
 
 ``` sh
-$ meteor add altapp:recaptcha
+$ meteor add appshore:recaptcha
 ```
 
 ## Setup
@@ -20,6 +24,7 @@ Add your reCAPTCHA public key (from Google) to the package. Do this in client-si
 ``` javascript
 Meteor.startup(function() {
     reCAPTCHA.config({
+        theme: 'light'  // 'light' default or 'dark'
         publickey: 'your_public_key_from_google'
     });
 });
@@ -59,25 +64,23 @@ In your submit event, include the reCAPTCHA data in your method call.
 
 ``` javascript
 Template.myTemplate.events({
-    'submit form': function(e) {
-        e.preventDefault();
+    'submit form': function(evt) {
+        evt.preventDefault();
+
+        
+        //console.log('g-recaptcha-response', $('#g-recaptcha-response').val(), evt);
 
         var formData = {
             //get the data from your form fields
+            ...
+            
+            // and the recaptcha response
+            g-recaptcha-response : $('#g-recaptcha-response').val()
         };
 
-        //get the captcha data
-        var captchaData = {
-            captcha_challenge_id: Recaptcha.get_challenge(),
-            captcha_solution: Recaptcha.get_response()
-        };
-
-        Meteor.call('formSubmissionMethod', formData, captchaData, function(error, result) {
-            if (error) {
-                console.log('There was an error: ' + error.reason);
-            } else {
-                console.log('Success!');
-            }
+        Meteor.call('formSubmissionMethod', formData, function (error, result) {
+            // recaptcha server response will be in result
+            console.log('result: ', error, result);
         });
     }
 });
@@ -89,15 +92,21 @@ In the server method, pass the captcha data and the user's IP address to `reCAPT
 
 ``` javascript
 Meteor.methods({
-    formSubmissionMethod: function(formData, captchaData) {
+    formSubmissionMethod: function(formData) {
 
-        var verifyCaptchaResponse = reCAPTCHA.verifyCaptcha(this.connection.clientAddress, captchaData);
+        var verifyCaptchaResponse = reCAPTCHA.verifyCaptcha(this.connection.clientAddress, formData.g-recaptcha-response);
 
-        if (!verifyCaptchaResponse.success) {
-            console.log('reCAPTCHA check failed!', verifyCaptchaResponse);
-            throw new Meteor.Error(422, 'reCAPTCHA Failed: ' + verifyCaptchaResponse.error);
-        } else
-            console.log('reCAPTCHA verification passed!');
+        //console.log('reCAPTCHA response', verifyCaptchaResponse.data);
+        /* verifyCaptchaResponse.data returns a json {
+                'success': true|false,
+                'error-codes': an-error-code
+            };
+            [https://developers.google.com/recaptcha/docs/verify](https://developers.google.com/recaptcha/docs/verify)
+        */
+        
+        if( verifyCaptchaResponse.data.success === false ){
+            return verifyCaptchaResponse.data;
+        }
 
         //do stuff with your formData
 
