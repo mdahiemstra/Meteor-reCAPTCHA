@@ -20,7 +20,7 @@ reCAPTCHA = {
         var success, parts; // used to process response string
 
         try {
-            captchaVerificationResult = HTTP.call("POST", "http://www.google.com/recaptcha/api/verify", {
+            captchaVerificationResult = HTTP.call("POST", "https://www.google.com/recaptcha/api/siteverify", {
                 content: serialized_captcha_data.toString('utf8'),
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
