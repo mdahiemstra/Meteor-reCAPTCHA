@@ -59,6 +59,25 @@ Include the `{{> reCAPTCHA}}` template block in your form template.
 </template>
 ```
 
+Add an id parameter to the `{{> reCAPTCHA}}` template block to display more than one captcha.
+
+``` html
+<template name="myTemplate">
+    <form>
+        <!-- no need of id for the first one -->
+    	{{> reCAPTCHA}}
+
+    	<button type="submit">Submit</button>
+    </form>
+
+    <form>
+        {{> reCAPTCHA id='captcha2'}}
+
+        <button type="submit">Submit 2</button>
+    </form>
+</template>
+```
+
 In your submit event, include the reCAPTCHA data in your method call.
 
 ``` javascript
@@ -66,13 +85,13 @@ Template.myTemplate.events({
     'submit form': function(evt) {
         evt.preventDefault();
 
-        
+
         //console.log('g-recaptcha-response', $('#g-recaptcha-response').val(), evt);
 
         var formData = {
             //get the data from your form fields
             ...
-            
+
             // and the recaptcha response
             g-recaptcha-response : $('#g-recaptcha-response').val()
         };
@@ -102,7 +121,7 @@ Meteor.methods({
             };
             // check at https://developers.google.com/recaptcha/docs/verify
         */
-        
+
         if( verifyCaptchaResponse.data.success === false ){
             return verifyCaptchaResponse.data;
         }

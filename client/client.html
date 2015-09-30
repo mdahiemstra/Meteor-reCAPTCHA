@@ -1,3 +1,7 @@
 <template name="reCAPTCHA">
-    <span id="recaptcha-container">Loading...</span>
+    {{#if id}}
+        <span id={{id}} name="reCaptcha">Loading...</span>
+    {{else}}
+        <span id="recaptcha-container" name="reCaptcha">Loading...</span>
+    {{/if}}
 </template>
