@@ -22,5 +22,6 @@ window.onloadcaptcha = function() {
 };
 
 Template.reCAPTCHA.rendered = function() {
-    $.getScript('//www.google.com/recaptcha/api.js?onload=onloadcaptcha&render=explicit');
+	var lang = reCAPTCHA.settings.lang || 'en';
+    $.getScript('//www.google.com/recaptcha/api.js?onload=onloadcaptcha&render=explicit' + '&hl=' + lang);
 };
